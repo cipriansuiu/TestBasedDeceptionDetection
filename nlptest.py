@@ -9,8 +9,7 @@ from nltk.classify.scikitlearn import  SklearnClassifier
 from sklearn.naive_bayes import MultinomialNB,GaussianNB,BernoulliNB
 from sklearn.linear_model import LogisticRegression,SGDClassifier
 from sklearn.svm import SVC,LinearSVC,NuSVC
-import time
-
+from VoteClassifier import VoteClassifier
 
 def read_from_directory(dir_name):
     os.chdir(dir_name)
@@ -82,8 +81,8 @@ def get_n_grams_for_sentence(sentence,n):
 
 
 featuresets = [(find_features(review), truthful) for (review, truthful) in documents]
-training_set = featuresets[:800]
-testing_set = featuresets[800:1000]
+training_set = featuresets[:1000]
+testing_set = featuresets[1000:1400]
 classifier_f = open("naivebayes.pickle","rb")
 NB_classifier = pickle.load(classifier_f)
 classifier_f.close()
@@ -126,3 +125,13 @@ classifiers = [("NB_classifier",NB_classifier)
 for cl in classifiers:
     print(cl[0]+": " + str(nltk.classify.accuracy(cl[1], testing_set) * 100))
 # classifier.show_most_informative_features(5)
+voted_classifier = VoteClassifier(NB_classifier,
+                                  NuSVC_classifier,
+                                  LinearSVC_classifier,
+                                  SGDClassifier_classifier,
+                                  MNB_classifier,
+                                  BernoulliNB_classifier,
+                                  LogisticRegression_classifier)
+
+for sentence in allSentences:
+print("voted_classifier accuracy percent:", (nltk.classify.accuracy(voted_classifier, testing_set))*100)
